@@ -20,7 +20,7 @@ router.post(
     body('password', 'Password has to be valid.')
       .isLength({ min: 5 })
       .isAlphanumeric()
-      .trim()
+      .trim(),
   ],
   authController.postLogin
 );
@@ -59,19 +59,20 @@ router.post(
           throw new Error('Passwords have to match!');
         }
         return true;
-      })
+      }),
   ],
   authController.postSignup
 );
 
 router.post('/logout', authController.postLogout);
 
-router.get('/reset', authController.getReset);
+// code for reseting forgetted password
+// router.get('/reset', authController.getReset);
 
-router.post('/reset', authController.postReset);
+// router.post('/reset', authController.postReset);
 
-router.get('/reset/:token', authController.getNewPassword);
+// router.get('/reset/:token', authController.getNewPassword);
 
-router.post('/new-password', authController.postNewPassword);
+// router.post('/new-password', authController.postNewPassword);
 
 module.exports = router;

@@ -7,7 +7,7 @@ const stripe = require('stripe')(process.env.STRIPE_KEY);
 const Product = require('../models/product');
 const Order = require('../models/order');
 
-const ITEMS_PER_PAGE = 2;
+const ITEMS_PER_PAGE = 3;
 
 exports.getProducts = (req, res, next) => {
   const page = +req.query.page || 1;
@@ -147,11 +147,13 @@ exports.getCheckout = (req, res, next) => {
       products.forEach(p => {
         total += p.quantity * p.productId.price;
       });
+
       res.render('shop/checkout', {
         path: '/checkout',
         pageTitle: 'Checkout',
         products: products,
-        totalSum: total,
+        totalSum: +total.toFixed(2),
+        totalcents: Math.round(total * 100),
       });
     })
     .catch(err => {
@@ -160,6 +162,58 @@ exports.getCheckout = (req, res, next) => {
       return next(error);
     });
 };
+
+// exports.getCheckout = (req, res, next) => {
+//   let products;
+//   let total = 0;
+//   req.user
+//     .populate('cart.items.productId')
+//     .then(user => {
+//       products = user.cart.items;
+//       total = 0;
+//       products.forEach(p => {
+//         total += p.quantity * p.productId.price;
+//       });
+
+//       // create stripe session to get session id
+//       return stripe.checkout.sessions.create({
+//         payment_method_types: ['card'], // paying method
+//         line_items: products.map(p => {
+//           return {
+//             price_data: {
+//               unit_amount: p.productId.price * 100, // needed feild, * 100 to be in cents
+//               currency: 'usd', // needed feild
+//               product_data: {
+//                 name: p.productId.title, // extra feild
+//                 description: p.productId.description, // extra feild
+//               },
+//             },
+//             quantity: p.quantity, // needed feild
+//           };
+//         }),
+
+//         mode: 'payment',
+//         // make urls for accessing to continue after finishing
+//         success_url:
+//           req.protocol + '://' + req.get('host') + '/checkout/success', // => http://localhost:3000
+//         cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel',
+//       });
+//     })
+//     .then(session => {
+//       res.render('shop/checkout', {
+//         path: '/checkout',
+//         pageTitle: 'Checkout',
+//         products: products,
+//         totalSum: total,
+//         sessionId: session.id,
+//       });
+//     })
+//     .catch(err => {
+//       const error = new Error(err);
+//       error.httpStatusCode = 500;
+//       return next(error);
+//     });
+// };
 
 exports.postOrder = (req, res, next) => {
   // Token is created using Checkout or Elements!
@@ -233,7 +287,7 @@ exports.getInvoice = (req, res, next) => {
         return next(new Error('Unauthorized'));
       }
       const invoiceName = 'invoice-' + orderId + '.pdf';
-      const invoicePath = path.join('data', 'invoices', invoiceName);
+      // const invoicePath = path.join('data', 'invoices', invoiceName);
 
       const pdfDoc = new PDFDocument();
       res.setHeader('Content-Type', 'application/pdf');
@@ -241,7 +295,7 @@ exports.getInvoice = (req, res, next) => {
         'Content-Disposition',
         'inline; filename="' + invoiceName + '"'
       );
-      pdfDoc.pipe(fs.createWriteStream(invoicePath));
+      // pdfDoc.pipe(fs.createWriteStream(invoicePath));
       pdfDoc.pipe(res);
 
       pdfDoc.fontSize(26).text('Invoice', {
