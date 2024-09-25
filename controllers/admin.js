@@ -1,5 +1,3 @@
-const mongoose = require('mongoose');
-
 const fileHelper = require('../util/file');
 
 const { validationResult } = require('express-validator');
@@ -197,6 +195,7 @@ exports.deleteProduct = (req, res, next) => {
       if (!product) {
         return next(new Error('Product not found.'));
       }
+      // not totaly true need to check if the product is related to this user first then continue instead of delete with prod_id and user_id
       fileHelper.deleteFile(product.imageUrl);
       return Product.deleteOne({ _id: prodId, userId: req.user._id });
     })

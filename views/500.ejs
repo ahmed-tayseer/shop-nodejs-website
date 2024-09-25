@@ -3,7 +3,11 @@
 
 <body>
     <%- include('includes/navigation.ejs') %>
-    <h1>Some error occurred!</h1>
-    <p>We're working on fixing this, sorry for the inconvenience!</p>
+    
+    <div style="text-align: center;">
+        <h1>🔴 Some error occurred!</h1>
+        <p><%= error ? error : "We're working on fixing this, sorry for the inconvenience!" %></p>     
+    </div>
+
 
 <%- include('includes/end.ejs') %>

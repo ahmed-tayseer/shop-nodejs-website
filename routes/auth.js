@@ -49,9 +49,9 @@ router.post(
       'password',
       'Please enter a password with only numbers and text and at least 5 characters.'
     )
+      .trim()
       .isLength({ min: 5 })
-      .isAlphanumeric()
-      .trim(),
+      .isAlphanumeric(),
     body('confirmPassword')
       .trim()
       .custom((value, { req }) => {
@@ -67,12 +67,31 @@ router.post(
 router.post('/logout', authController.postLogout);
 
 // code for reseting forgetted password
-// router.get('/reset', authController.getReset);
+router.get('/reset', authController.getReset);
 
-// router.post('/reset', authController.postReset);
+router.post('/reset', authController.postReset);
 
-// router.get('/reset/:token', authController.getNewPassword);
+router.get('/reset/:token', authController.getNewPassword);
 
-// router.post('/new-password', authController.postNewPassword);
+router.post(
+  '/new-password',
+  [
+    body('password')
+      .trim()
+      .isLength({ min: 5 })
+      .withMessage('Password must be at least 5 characters.')
+      .isAlphanumeric()
+      .withMessage('Password must be with numbers and text.'),
+    body('confirmPassword')
+      .trim()
+      .custom((value, { req }) => {
+        if (value !== req.body.password) {
+          throw new Error('Passwords have to match!');
+        }
+        return true;
+      }),
+  ],
+  authController.postNewPassword
+);
 
 module.exports = router;

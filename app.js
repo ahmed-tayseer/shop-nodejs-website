@@ -1,5 +1,5 @@
 const path = require('path');
-const fs = require('fs');
+// const fs = require('fs');
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -121,10 +121,18 @@ app.use(errorController.get404);
 app.use((error, req, res, next) => {
   // res.status(error.httpStatusCode).render(...);
   // res.redirect('/500');
-  console.log('👉 printing the error: ', error);
+  // console.log('👉 printing the error: ', error);
+
+  if (error.httpStatusCode === 404)
+    return res.status(404).render('404', {
+      pageTitle: 'Error!',
+      path: '/404',
+    });
+
   res.status(500).render('500', {
     pageTitle: 'Error!',
     path: '/500',
+    error: error?.message,
   });
 });
 
